@@ -1,5 +1,7 @@
 shape_predictor_68_face_landmarks.dat
-
+shape_predictor_68_face_landmarks.dat.bz2
+test
+output
 
 
 # Created by https://www.gitignore.io/api/python,pycharm+all

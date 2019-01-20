@@ -9,7 +9,8 @@ import random
 # 1: left eye
 # 2: mouth
 # 3: nose
-ft_idx_range = [(36, 41), (42, 47), (48, 67), (27, 35)]
+ft_idx_range = [(36, 41), (42, 47), (48, 59), (27, 35)]
+ft_map = {'r_eye': 0, 'l_eye': 1, 'mouth': 2, 'nose': 3}
 
 
 def detect(img_rd, debug=False):
@@ -51,23 +52,53 @@ def detect(img_rd, debug=False):
         return None
 
 
-def add_mask(img_rd, ft_centers: list, landmarks: list):
+def add_mask(img_rd, ft_list: list, ft_centers: list, landmarks: list):
+    """
+    Add masks.
+
+    :param img_rd: Image object
+    :param ft_list: the features need to be masked. e.g. ['r_eye','l_eye','mouth','nose'] or ['all'] or ['*']
+    :param ft_centers: center points
+    :param landmarks: lm points
+    :return: img_rd
+    """
+    try:
+        assert ft_list in (['*'], ['all']) or set(ft_list).issubset(ft_map.keys())
+    except AssertionError as e:
+        print('keys:', ft_map.keys())
+        raise e
+
+    if ft_list in (['*'], ['all']):
+        ft_list = [name for name in ft_map.keys()]
+    ft_set = set([ft_map[ft] for ft in ft_list])
+
     for ft in range(len(ft_idx_range)):
+        if ft not in ft_set:
+            continue
         ft_st, ft_ed = ft_idx_range[ft]
         lm = np.array(landmarks[ft_st:ft_ed + 1])
         lm = lm.reshape([-1, 1, 2])
-        cv2.polylines(img_rd, lm, True, (0, 0, 255), 10)
         cv2.fillPoly(img_rd, [lm], (255, 255, 255))
 
         cv2.ellipse(img_rd, ft_centers[ft], (random.randrange(25, 100), random.randrange(25, 100)),
                     random.randrange(0, 90), 0, 360, (255, 255, 255), thickness=-1)
         cv2.ellipse(img_rd, ft_centers[ft], (random.randrange(25, 100), random.randrange(25, 100)),
                     random.randrange(0, 90), 0, 360, (255, 255, 255), thickness=-1)
+    return img_rd
+
+
+def auto_mask(input_path: str, ft_list: list, debug=False):
+    img = cv2.imread(input_path)
+    centers, landmarks = detect(img, debug)
+    add_mask(img, ft_list, centers, landmarks)
+    return img
+
+
+def imsave(output_dir, img):
+    cv2.imwrite(output_dir, img)
 
 
 if __name__ == '__main__':
-    img = cv2.imread("test.jpg")
-    centers, landmarks = detect(img, True)
-    add_mask(img, centers, landmarks)
+    img = auto_mask('test.jpg', ['mouth'], True)
     cv2.imshow('', img)
     cv2.waitKey(0)
