@@ -43,7 +43,7 @@ def detect(img_rd, debug=False):
         for ft in range(len(ft_idx_range)):
             if debug:
                 cv2.circle(img_rd, ft_centers[ft], 6, color=(255, 0, 0), thickness=-1)
-        return ft_centers
+        return ft_centers, landmarks
 
     else:
         msg = 'no faces' if not len(faces) else 'mul faces: %d' % len(faces)
@@ -51,8 +51,14 @@ def detect(img_rd, debug=False):
         return None
 
 
-def add_mask(img_rd, ft_centers: list):
+def add_mask(img_rd, ft_centers: list, landmarks: list):
     for ft in range(len(ft_idx_range)):
+        ft_st, ft_ed = ft_idx_range[ft]
+        lm = np.array(landmarks[ft_st:ft_ed + 1])
+        lm = lm.reshape([-1, 1, 2])
+        cv2.polylines(img_rd, lm, True, (0, 0, 255), 10)
+        cv2.fillPoly(img_rd, [lm], (255, 255, 255))
+
         cv2.ellipse(img_rd, ft_centers[ft], (random.randrange(25, 100), random.randrange(25, 100)),
                     random.randrange(0, 90), 0, 360, (255, 255, 255), thickness=-1)
         cv2.ellipse(img_rd, ft_centers[ft], (random.randrange(25, 100), random.randrange(25, 100)),
@@ -61,7 +67,7 @@ def add_mask(img_rd, ft_centers: list):
 
 if __name__ == '__main__':
     img = cv2.imread("test.jpg")
-    centers = detect(img, True)
-    add_mask(img, centers)
+    centers, landmarks = detect(img, True)
+    add_mask(img, centers, landmarks)
     cv2.imshow('', img)
     cv2.waitKey(0)
