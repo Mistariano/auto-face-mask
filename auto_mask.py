@@ -54,7 +54,8 @@ def main():
 
         filename = prefix + '.' + suffix
 
-        img = cv2.imread(f_path, cv2.IMREAD_COLOR)
+        img = cv2.imread(os.path.join(input_dir, f_path))
+
         centers, landmarks = detect(img)
 
         if landmarks is None:

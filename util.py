@@ -65,6 +65,7 @@ def get_mask(img_rd, ft_list: list, ft_centers: list, landmarks: list, disturb_e
     :param randrange:
     :return: img_rd
     """
+    ft_list = [ft for ft in ft_list]
     try:
         assert ft_list in (['*'], ['all']) or set(ft_list).issubset(
             set(ft_map.keys()).union(['single_eye', 'double_eye']))
@@ -115,6 +116,6 @@ def imsave(output_dir, img):
 
 
 if __name__ == '__main__':
-    img = auto_mask_single_img('test.jpg', ['mouth'], True)
+    img = auto_mask_single_img('img.jpg', ['mouth'], True)
     cv2.imshow('', img)
     cv2.waitKey(0)
