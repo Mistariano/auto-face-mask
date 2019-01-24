@@ -59,7 +59,7 @@ def main():
         centers, landmarks = detect(img)
 
         if landmarks is None:
-            with open(os.path.join(output_dir, 'fails.log'), 'w+') as f:
+            with open(os.path.join(output_dir, 'fails.log'), 'a') as f:
                 f.write(filename)
             print(filename, 'failed')
             continue
